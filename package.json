@@ -6,6 +6,9 @@
   "dependencies": {
     "bindings": "^1.2.1"
   },
+  "os": [
+    "!win32"
+  ],
   "devDependencies": {
     "defence-cli": "^2.0.1",
     "nan": "^2.0.5",
