@@ -1,1 +1,1 @@
-module.exports = require('bindings')('NativeExtension');
+module.exports = require('bindings')('NativeExtension').Directory
