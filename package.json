@@ -6,9 +6,6 @@
   "dependencies": {
     "bindings": "^1.2.1"
   },
-  "os": [
-    "!win32"
-  ],
   "devDependencies": {
     "defence-cli": "^2.0.1",
     "nan": "^2.0.5",
@@ -17,13 +14,16 @@
     "standard": "^8.0.0"
   },
   "license": "MIT",
+  "os": [
+    "!win32"
+  ],
   "repository": "kemitchell/native-readdir.js",
   "scripts": {
     "build": "node-gyp build",
     "configure": "node-gyp configure",
+    "format": "astyle *.cc *.h",
     "lint": "standard",
     "pretest": "npm run build",
-    "test": "defence README.md | replace-require-self | node",
-    "format": "astyle *.cc *.h"
+    "test": "defence README.md | replace-require-self | node"
   }
 }
