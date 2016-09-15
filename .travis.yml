@@ -4,6 +4,7 @@ node_js:
 - "0.10"
 - "0.11"
 - "0.12"
+- "lts/argon"
 - node
 sudo: false
 env: [ "CXX=g++-4.8 RUN_SLOW_TESTS=true TEST_DELAY=100" ]
