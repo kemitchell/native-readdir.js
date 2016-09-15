@@ -49,16 +49,15 @@ NAN_METHOD(Directory::New) {
 
 NAN_METHOD(Directory::Open) {
     Directory* object = Nan::ObjectWrap::Unwrap<Directory>(info.This());
-    char* path = object->path;
     errno = 0;
-    DIR* directory = opendir(path);
+    DIR* directory = opendir(object->path);
     if (directory == NULL) {
         Nan::ThrowError(
             Nan::ErrnoException(
                 errno,
                 "readdir",
                 NULL,
-                NULL // TODO directory
+                object->path
             )
         );
     } else {
@@ -85,7 +84,7 @@ NAN_METHOD(Directory::Read) {
                     errno,
                     "readdir",
                     NULL,
-                    NULL // TODO directory
+                    object->path
                 )
             );
         }
@@ -113,7 +112,7 @@ NAN_METHOD(Directory::Close) {
                 errno,
                 "readdir",
                 NULL,
-                NULL // TODO directory
+                object->path
             )
         );
     }
