@@ -53,12 +53,7 @@ NAN_METHOD(Directory::Open) {
     DIR* directory = opendir(object->path);
     if (directory == NULL) {
         Nan::ThrowError(
-            Nan::ErrnoException(
-                errno,
-                "readdir",
-                NULL,
-                object->path
-            )
+            Nan::ErrnoException(errno, "opendir", NULL, object->path)
         );
     } else {
         object->directory = directory;
@@ -78,16 +73,11 @@ NAN_METHOD(Directory::Read) {
     if (entry == NULL) {
         if (errno == 0) {
             info.GetReturnValue().Set(Nan::Null());
-        } else {
-            Nan::ThrowError(
-                Nan::ErrnoException(
-                    errno,
-                    "readdir",
-                    NULL,
-                    object->path
-                )
-            );
+            return;
         }
+        Nan::ThrowError(
+            Nan::ErrnoException(errno, "readdir", NULL, object->path)
+        );
     } else {
         info.GetReturnValue().Set(
             Nan::New(entry->d_name).ToLocalChecked()
@@ -106,14 +96,9 @@ NAN_METHOD(Directory::Close) {
     // Return `true` on successful close.
     if (closedir(directory) == 0) {
         info.GetReturnValue().Set(Nan::True());
-    } else {
-        Nan::ThrowError(
-            Nan::ErrnoException(
-                errno,
-                "readdir",
-                NULL,
-                object->path
-            )
-        );
+        return;
     }
+    Nan::ThrowError(
+        Nan::ErrnoException(errno, "closedir", NULL, object->path)
+    );
 }
