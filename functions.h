@@ -2,7 +2,8 @@
 #define NATIVE_EXTENSION_GRAB_H
 
 #include <nan.h>
-#include <sys/types.h> // for DIR
+#include <dirent.h>
+#include <sys/types.h>
 
 class Directory : public Nan::ObjectWrap {
 public:
