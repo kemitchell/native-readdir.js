@@ -1,16 +1,21 @@
 {
-  "main": "index.js",
-  "scripts": {
-    "configure": "node-gyp configure",
-    "build": "node-gyp build",
-    "test": "mocha"
-  },
-  "devDependencies": {
-    "nan": "^2.0.5",
-    "mocha": "^2.2.5",
-    "node-gyp": "^1.0.3"
-  },
+  "name": "create-readdir-stream",
+  "description": "streaming readdir(3) for Node.js",
+  "version": "0.0.0",
+  "author": "Kyle E. Mitchell <kyle@kemitchell.com> (https://kemitchell.com)",
   "dependencies": {
     "bindings": "^1.2.1"
+  },
+  "devDependencies": {
+    "mocha": "^2.2.5",
+    "nan": "^2.0.5",
+    "node-gyp": "^1.0.3"
+  },
+  "license": "MIT",
+  "repository": "kemitchell/create-readdir-stream.js",
+  "scripts": {
+    "build": "node-gyp build",
+    "configure": "node-gyp configure",
+    "test": "mocha"
   }
 }

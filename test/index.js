@@ -45,5 +45,5 @@ describe('native extension', function() {
   it('should export function that calls a callback', function(done) {
     nativeExtension.callback(done);
   });
-  
+
 });
