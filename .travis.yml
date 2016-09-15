@@ -7,8 +7,11 @@ node_js:
 - "lts/argon"
 - node
 sudo: false
-env: [ "CXX=g++-4.8 RUN_SLOW_TESTS=true TEST_DELAY=100" ]
+env:
+- "CXX=g++-4.8 RUN_SLOW_TESTS=true TEST_DELAY=100"
 addons:
   apt:
-    sources: [ "ubuntu-toolchain-r-test" ]
-    packages: [ "g++-4.8" ]
+    sources:
+    - "ubuntu-toolchain-r-test"
+    packages:
+    - "g++-4.8"
