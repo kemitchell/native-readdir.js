@@ -5,3 +5,9 @@ node_js:
 - "0.11"
 - "0.12"
 - node
+sudo: false
+env: [ "CXX=g++-4.8 RUN_SLOW_TESTS=true TEST_DELAY=100" ]
+addons:
+  apt:
+    sources: [ "ubuntu-toolchain-r-test" ]
+    packages: [ "g++-4.8" ]
