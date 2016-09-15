@@ -27,11 +27,14 @@ var reader = new Reader(directory)
 // You must call `.open()`.
 assert.strictEqual(reader.open(), true)
 
-// Calls `.read()` return strings, then `null`.
-assert.strictEqual(reader.read(), '.')
-assert.strictEqual(reader.read(), 'a')
-assert.strictEqual(reader.read(), 'b')
-assert.strictEqual(reader.read(), '..')
+// `.read()` returns a string for every entry.
+var fileNames = []
+for (var i = 0; i < 4; i++) {
+  fileNames.push(reader.read())
+}
+assert.deepEqual(fileNames.sort(), ['.', '..', 'a', 'b'])
+
+// `.read()` returns `null` on end.
 assert.strictEqual(reader.read(), null)
 
 // You must call `.close()`.
