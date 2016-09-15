@@ -1,5 +1,6 @@
 #include "functions.h"
 #include <dirent.h>
+#include <errno.h>
 #include <sys/types.h>
 
 Nan::Persistent<v8::Function> Directory::constructor;
