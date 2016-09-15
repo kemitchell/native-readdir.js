@@ -13,6 +13,7 @@ var Reader = require('native-readdir')
 var fs = require('fs')
 var path = require('path')
 var assert = require('assert')
+var series = require('run-series')
 
 // Create a directory.
 var directory = '/tmp/example-' + new Date().toISOString()
@@ -25,22 +26,44 @@ fs.writeFileSync(path.join(directory, 'b'), 'Banana')
 // Create a readdir object.  Unfortunately, this object encapsulates
 // magic:  The POSIX `DIR` pointer from `opendir(3)`.
 var reader = new Reader(directory)
+var entries = []
 
-// You must call `.open()`.
-assert.strictEqual(reader.open(), true)
+series([
+  function (done) {
+    // You must call `.open()`.
+    reader.open(function (error) {
+      assert.ifError(error)
+      done()
+    })
+  },
+  readEntry,
+  readEntry,
+  readEntry,
+  readEntry,
+  function (done) {
+    assert.deepEqual(entries.sort(), ['.', '..', 'a', 'b'])
+    // `.read()` returns `null` on end.
+    reader.read(function (error, entry) {
+      assert.ifError(error)
+      assert.equal(entry, null)
+    })
+  },
+  function (done) {
+    // You must call `.close()`.
+    reader.close(function (error) {
+      assert.ifError(error)
+    })
+  }
+])
 
-// `.read()` returns a string for every entry.
-var fileNames = []
-for (var i = 0; i < 4; i++) {
-  fileNames.push(reader.read())
+function readEntry (done) {
+  reader.read(function (error, entry) {
+    assert.ifError(error)
+    assert.equal(typeof entry, 'string')
+    entries.push(entry)
+    done()
+  })
 }
-assert.deepEqual(fileNames.sort(), ['.', '..', 'a', 'b'])
-
-// `.read()` returns `null` on end.
-assert.strictEqual(reader.read(), null)
-
-// You must call `.close()`.
-assert.strictEqual(reader.close(), true)
 ```
 
 This package started with Fabian Canas' [node-native-boilerplate]. Fabian was kind enough to license his boilerplate under The MIT License.  I've licensed my code under The MIT License, too.

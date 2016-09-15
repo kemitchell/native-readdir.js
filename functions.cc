@@ -3,6 +3,21 @@
 #include <errno.h>
 #include <sys/types.h>
 
+using Nan::AsyncQueueWorker;
+using Nan::AsyncWorker;
+using Nan::Callback;
+using Nan::GetFunction;
+using Nan::HandleScope;
+using Nan::New;
+using Nan::Null;
+using Nan::Set;
+using v8::Function;
+using v8::FunctionTemplate;
+using v8::Local;
+using v8::Object;
+using v8::String;
+using v8::Value;
+
 Nan::Persistent<v8::Function> Directory::constructor;
 
 NAN_MODULE_INIT(Directory::Init) {
@@ -11,9 +26,9 @@ NAN_MODULE_INIT(Directory::Init) {
     functionTemplate->SetClassName(Nan::New("Directory").ToLocalChecked());
     functionTemplate->InstanceTemplate()->SetInternalFieldCount(1);
 
-    Nan::SetPrototypeMethod(functionTemplate, "open", Open);
-    Nan::SetPrototypeMethod(functionTemplate, "read", Read);
-    Nan::SetPrototypeMethod(functionTemplate, "close", Close);
+    Nan::SetPrototypeMethod(functionTemplate, "open", Directory::Open);
+    Nan::SetPrototypeMethod(functionTemplate, "read", Directory::Read);
+    Nan::SetPrototypeMethod(functionTemplate, "close", Directory::Close);
 
     constructor.Reset(Nan::GetFunction(functionTemplate).ToLocalChecked());
     Nan::Set(
@@ -23,9 +38,13 @@ NAN_MODULE_INIT(Directory::Init) {
     );
 }
 
-Directory::Directory(char* path) : path(path) {}
+Directory::Directory(Nan::Utf8String* path) : path(path) {}
 
-Directory::~Directory() {}
+Directory::~Directory() {
+    delete path;
+}
+
+// Constructor
 
 NAN_METHOD(Directory::New) {
     if (info.IsConstructCall()) {
@@ -34,8 +53,7 @@ NAN_METHOD(Directory::New) {
         } else {
             // See https://github.com/nodejs/nan/issues/464 on conversion
             // to C-string.
-            Nan::Utf8String pathString(info[0]);
-            Directory* object = new Directory(*pathString);
+            Directory* object = new Directory(new Nan::Utf8String(info[0]));
             object->Wrap(info.This());
             info.GetReturnValue().Set(info.This());
         }
@@ -47,58 +65,126 @@ NAN_METHOD(Directory::New) {
     }
 }
 
+// Open
+
+OpenWorker::OpenWorker(Directory* directory, Callback* callback)
+    : AsyncWorker(callback), directory(directory) { }
+
+OpenWorker::~OpenWorker () { }
+
+void OpenWorker::Execute () {
+    errno = 0;
+    result = opendir(**directory->path);
+    saved_errno = errno;
+}
+
+void OpenWorker::HandleOKCallback () {
+    HandleScope scope;
+    Local<Value> argv[1];
+    if (result == NULL) {
+        argv[0] = Nan::ErrnoException(
+                      saved_errno,
+                      "opendir",
+                      NULL,
+                      **directory->path
+                  );
+    } else {
+        directory->stream = result;
+        argv[0] = Null();
+    }
+    callback->Call(1, argv);
+};
+
 NAN_METHOD(Directory::Open) {
     Directory* object = Nan::ObjectWrap::Unwrap<Directory>(info.This());
-    errno = 0;
-    DIR* directory = opendir(object->path);
-    if (directory == NULL) {
-        Nan::ThrowError(
-            Nan::ErrnoException(errno, "opendir", NULL, object->path)
-        );
-    } else {
-        object->directory = directory;
-        info.GetReturnValue().Set(Nan::True());
-    }
+    Callback* callback = new Callback(info[0].As<Function>());
+    AsyncQueueWorker(new OpenWorker(object, callback));
 }
+
+// Read
+
+ReadWorker::ReadWorker(Directory* directory, Callback* callback)
+    : AsyncWorker(callback), directory(directory) { }
+
+ReadWorker::~ReadWorker () { }
+
+void ReadWorker::Execute() {
+    errno = 0;
+    result = readdir(directory->stream);
+    saved_errno = errno;
+}
+
+void ReadWorker::HandleOKCallback () {
+    HandleScope scope;
+    if (result == NULL) {
+        if (saved_errno == 0) {
+            Local<Value> argv[] = {
+                Null()
+            };
+            directory->stream = NULL;
+            callback->Call(1, argv);
+        } else {
+            Local<Value> argv[] = {
+                Nan::ErrnoException(
+                    saved_errno,
+                    "readdir",
+                    NULL,
+                    **directory->path
+                )
+            };
+            callback->Call(1, argv);
+        }
+    } else {
+        Local<Value> argv[] = {
+            Null(),
+            Nan::New(result->d_name).ToLocalChecked()
+        };
+        callback->Call(2, argv);
+    }
+};
 
 NAN_METHOD(Directory::Read) {
     Directory* object = Nan::ObjectWrap::Unwrap<Directory>(info.This());
-    DIR* directory = object->directory;
-    if (directory == NULL) {
-        Nan::ThrowError("no open DIR");
-        return;
-    }
-    errno = 0;
-    struct dirent* entry = readdir(directory);
-    if (entry == NULL) {
-        if (errno == 0) {
-            info.GetReturnValue().Set(Nan::Null());
-            return;
-        }
-        Nan::ThrowError(
-            Nan::ErrnoException(errno, "readdir", NULL, object->path)
-        );
-    } else {
-        info.GetReturnValue().Set(
-            Nan::New(entry->d_name).ToLocalChecked()
-        );
-    }
+    Callback* callback = new Callback(info[0].As<Function>());
+    AsyncQueueWorker(new ReadWorker(object, callback));
 }
+
+// Close
+
+CloseWorker::CloseWorker(Directory* directory, Callback* callback)
+    : AsyncWorker(callback), directory(directory) { }
+
+CloseWorker::~CloseWorker () { }
+
+void CloseWorker::Execute () {
+    errno = 0;
+    result = closedir(directory->stream);
+    saved_errno = errno;
+};
+
+void CloseWorker::HandleOKCallback () {
+    HandleScope scope;
+    if (result == 0) {
+        Local<Value> argv[1] = {
+            Null()
+        };
+        directory->stream = NULL;
+        callback->Call(1, argv);
+    } else {
+        Local<Value> argv[1] = {
+            Nan::ErrnoException(
+                saved_errno,
+                "closedir",
+                NULL,
+                **directory->path
+            )
+        };
+        callback->Call(1, argv);
+    }
+};
 
 NAN_METHOD(Directory::Close) {
     Directory* object = Nan::ObjectWrap::Unwrap<Directory>(info.This());
-    DIR* directory = object->directory;
-    if (directory == NULL) {
-        Nan::ThrowError("no open DIR");
-        return;
-    }
-    errno = 0;
-    // Return `true` on successful close.
-    if (closedir(directory) == 0) {
-        info.GetReturnValue().Set(Nan::True());
-        return;
-    }
-    Nan::ThrowError(
-        Nan::ErrnoException(errno, "closedir", NULL, object->path)
-    );
+    Callback* callback = new Callback(info[0].As<Function>());
+    AsyncQueueWorker(new CloseWorker(object, callback));
 }

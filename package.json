@@ -11,6 +11,7 @@
     "defence-cli": "^2.0.1",
     "node-gyp": "^1.0.3",
     "replace-require-self": "^1.1.1",
+    "run-series": "^1.1.4",
     "standard": "^8.0.0"
   },
   "engines": {
