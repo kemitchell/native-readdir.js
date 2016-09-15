@@ -2,7 +2,9 @@ POSIX `readdir(3)` streams directory entries, but, alas, Node.js' `fs.readdir()`
 
 [no-readdir]: https://github.com/libuv/libuv/blob/b12624c13693c4d29ca84b3556eadc9e9c0936a4/docs/src/migration_010_100.rst#uv_fs_readdir-rename-and-api-change
 
-This module builds a very thin native Node.js add-on wrapper around `opendir(3)`, `readdir(3)`, and `closedir(3)` for streaming directory reads.  The binding is a bit clunky, tracking the C API closely. The lower-level API will mostly help folks implementing streams.  Unless you're building a stream, you probably want to use a stream that uses this package.
+This module builds a very thin native Node.js add-on wrapper around `opendir(3)`, `readdir(3)`, and `closedir(3)` for streaming directory reads.  The binding is a bit clunky, tracking the C API closely. The lower-level API will mostly help folks implementing streams.
+
+**Unless you're building a stream, you probably want to use a stream package that in turn uses this package.**
 
 Behold!  A test suite:
 
