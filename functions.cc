@@ -125,9 +125,10 @@ void ReadWorker::HandleOKCallback () {
     if (result == NULL) {
         if (saved_errno == 0) {
             Local<Value> argv[] = {
+                Null(),
                 Null()
             };
-            callback->Call(1, argv);
+            callback->Call(2, argv);
         } else {
             Local<Value> argv[] = {
                 Nan::ErrnoException(
