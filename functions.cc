@@ -68,7 +68,10 @@ NAN_METHOD(Directory::New) {
 // Open
 
 OpenWorker::OpenWorker(Directory* directory, Callback* callback)
-    : AsyncWorker(callback), directory(directory) { }
+    : AsyncWorker(callback), directory(directory) {
+    result = NULL;
+    saved_errno = 0;
+}
 
 OpenWorker::~OpenWorker () { }
 
@@ -104,7 +107,10 @@ NAN_METHOD(Directory::Open) {
 // Read
 
 ReadWorker::ReadWorker(Directory* directory, Callback* callback)
-    : AsyncWorker(callback), directory(directory) { }
+    : AsyncWorker(callback), directory(directory) {
+    result = NULL;
+    saved_errno = 0;
+}
 
 ReadWorker::~ReadWorker () { }
 
@@ -152,7 +158,10 @@ NAN_METHOD(Directory::Read) {
 // Close
 
 CloseWorker::CloseWorker(Directory* directory, Callback* callback)
-    : AsyncWorker(callback), directory(directory) { }
+    : AsyncWorker(callback), directory(directory) {
+    result = 0;
+    saved_errno = 0;
+}
 
 CloseWorker::~CloseWorker () { }
 
