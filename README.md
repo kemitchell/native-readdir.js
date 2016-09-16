@@ -1,8 +1,8 @@
-POSIX `readdir(3)` streams directory entries, but, alas, Node.js' `fs.readdir()` calls back with an array.  An array is plenty fine ... unless you've lots and lots of files in a directory, and want to handle them one at a time.  Frankly, if you want an array, you might as well `scandir(3)` instead.  Last I checked, that's exactly what libuv does.  [There is no `readdir(3)` in `fs.readdir()`.][no-readdir]
+POSIX `readdir(3)` streams directory entries, but, alas, Node.js' `fs.readdir()` calls back with an array.  An array is fine ... unless you've _a massive number of files in the directory_, and want to handle them one at a time.  Frankly, if you want an array, you might as well `scandir(3)`, which is exactly what libuv does.  [There is no `readdir(3)` in `fs.readdir()`.][no-readdir]
 
 [no-readdir]: https://github.com/libuv/libuv/blob/b12624c13693c4d29ca84b3556eadc9e9c0936a4/docs/src/migration_010_100.rst#uv_fs_readdir-rename-and-api-change
 
-This module builds a very thin native Node.js add-on wrapper around `opendir(3)`, `readdir(3)`, and `closedir(3)` for streaming directory reads.  The binding is a bit clunky, tracking the C API closely. The lower-level API will mostly help folks implementing streams.
+This module builds a very thin native Node.js add-on wrapper around `opendir(3)`, `readdir(3)`, and `closedir(3)` for streaming directory reads.  The binding is a bit clunky, tracking the C-language API.
 
 **Unless you're building a stream, you probably want to use a stream package that in turn uses this package.**
 
