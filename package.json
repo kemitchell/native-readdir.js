@@ -12,7 +12,8 @@
     "node-gyp": "^1.0.3",
     "replace-require-self": "^1.1.1",
     "run-series": "^1.1.4",
-    "standard": "^8.0.0"
+    "standard": "^8.0.0",
+    "standard-markdown": "^1.2.1"
   },
   "engines": {
     "node": ">=0.10.0"
@@ -26,7 +27,7 @@
     "build": "node-gyp build",
     "configure": "node-gyp configure",
     "format": "astyle *.cc *.h",
-    "lint": "standard",
+    "lint": "standard && standard-markdown",
     "pretest": "npm run build",
     "test": "defence README.md | replace-require-self | node"
   }
