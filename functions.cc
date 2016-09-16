@@ -127,7 +127,6 @@ void ReadWorker::HandleOKCallback () {
             Local<Value> argv[] = {
                 Null()
             };
-            directory->stream = NULL;
             callback->Call(1, argv);
         } else {
             Local<Value> argv[] = {
