@@ -1,7 +1,7 @@
 {
   "name": "native-readdir",
   "description": "native readdir(3) and friends for Node.js",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "author": "Kyle E. Mitchell <kyle@kemitchell.com> (https://kemitchell.com)",
   "dependencies": {
     "bindings": "^1.2.1",
